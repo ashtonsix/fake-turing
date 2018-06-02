@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const Koa = require('koa')
+const logger = require('koa-logger')
 const bodyParser = require('koa-bodyparser')
 const serve = require('koa-static')
 const Router = require('koa-router')
@@ -185,6 +186,7 @@ router.use(
 )
 router.get('/*', serve(path.resolve(__dirname, '../../client/build')))
 
+app.use(logger())
 app.use(async (ctx, next) => {
   try {
     await next()

@@ -14,6 +14,17 @@ const createGame = id => ({
   strangerTyping: null
 })
 
+const getUser = async forceRefresh => {
+  let user
+  if (!forceRefresh) window.localStorage.getItem('user')
+  if (!user) {
+    const response = await axios.post('/api/create-player')
+    user = response.data.data
+    window.localStorage.setItem('user', user)
+  }
+  return user
+}
+
 class Store extends Component {
   state = {
     game: null,
@@ -38,14 +49,8 @@ class Store extends Component {
     this.setState = this.setState.bind(this)
   }
   async componentDidMount() {
-    let user
-    user = window.localStorage.getItem('user')
+    let user = await getUser()
     const score = parseInt(window.localStorage.getItem('score'), 10) || 0
-    if (!user) {
-      const response = await axios.post('/api/create-player')
-      user = response.data.data
-      window.localStorage.setItem('user', user)
-    }
     this.setState({user, score})
   }
   onReadIntro() {
@@ -123,7 +128,12 @@ class Store extends Component {
     try {
       response = await axios.post('/api/join-game', {user})
     } catch (e) {
-      this.setState({screen: 'retry'})
+      if (e.response.data === 'User not found') {
+        const user = await getUser(true)
+        this.setState({user}, () => this.joinGame())
+      } else {
+        this.setState({screen: 'retry'})
+      }
       return
     }
     const game = response.data.data
