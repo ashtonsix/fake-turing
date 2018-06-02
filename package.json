@@ -1,0 +1,23 @@
+{
+  "name": "fake-turing",
+  "version": "0.1.0",
+  "author": "Ashton Six <me@ashtonsix.com>",
+  "scripts": {
+    "postinstall": "lerna bootstrap",
+    "flow": "flow"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.2.3",
+    "eslint": "4.15.0",
+    "eslint-config-react-app": "^2.1.0",
+    "eslint-plugin-flowtype": "^2.49.3",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-jsx-a11y": "^5.1.1",
+    "eslint-plugin-react": "^7.8.2",
+    "lerna": "^2.11.0",
+    "prettier": "^1.8.2"
+  },
+  "dependencies": {
+    "flow-bin": "^0.73.0"
+  }
+}
