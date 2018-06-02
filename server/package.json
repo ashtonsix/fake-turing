@@ -6,10 +6,12 @@
   "scripts": {
     "postinstall": "touch src/games.jsonl src/players.jsonl",
     "start": "nodemon src/index.js",
+    "prod": "forever src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "boom": "^7.2.0",
+    "forever": "^0.15.3",
     "koa": "^2.5.1",
     "koa-bodyparser": "^4.2.0",
     "koa-router": "^7.4.0",
