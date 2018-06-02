@@ -4,6 +4,7 @@
   "author": "Ashton Six <me@ashtonsix.com> (ashtonsix.com)",
   "private": true,
   "scripts": {
+    "postinstall": "touch src/games.jsonl src/players.jsonl",
     "start": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
