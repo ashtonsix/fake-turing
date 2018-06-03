@@ -191,7 +191,6 @@ app.use(async (ctx, next) => {
   try {
     await next()
   } catch (err) {
-    console.error(err.isBoom ? err.output : err)
     ctx.status = err.isBoom ? err.output.statusCode : 500
     ctx.body = err.message
   }

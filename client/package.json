@@ -7,6 +7,7 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
+  "homepage": ".",
   "proxy": {
     "/api": {
       "target": "http://localhost:3001"
@@ -28,10 +29,10 @@
   "dependencies": {
     "antd": "^3.6.1",
     "axios": "^0.18.0",
-    "particlesjs": "^2.2.2",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
     "react-scripts": "next",
-    "react-spinkit": "^3.0.0"
+    "react-spinkit": "^3.0.0",
+    "trianglify": "^1.2.0"
   }
 }

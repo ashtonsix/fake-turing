@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import axios from 'axios'
 import Spinner from 'react-spinkit'
-import Particles from 'particlesjs'
+import Trianglify from 'trianglify'
 import {Intro, Legal, Retry} from './Explainers'
 
 const createGame = id => ({
@@ -65,16 +65,13 @@ class Store extends Component {
   }
   componentDidUpdate(prevProps, prevState) {
     window.localStorage.setItem('score', this.state.score.toString())
+    if (this.state.joining) return
     // prettier-ignore
-    if (
-      (
-        prevState.screen !== 'game' &&
-        this.state.screen === 'game' &&
-        !prevState.game &&
-        !prevState.joining
-      ) ||
-      (prevState.game && prevState.game.stage === 'end' && !this.state.game)
-    ) {
+    if (prevState.screen === 'game' && this.state.screen !== 'game') {
+      this.setState({game: null})
+    } else if (prevState.screen !== 'game' && this.state.screen === 'game') {
+      this.joinGame()
+    } else if (this.state.screen === 'game' && prevState.game && !this.state.game) {
       this.joinGame()
     }
   }
@@ -122,8 +119,8 @@ class Store extends Component {
     })
   }
   async joinGame() {
-    this.setState({game: null, joining: true})
     const {user} = this.state
+    this.setState({joining: true})
     let response
     try {
       response = await axios.post('/api/join-game', {user})
@@ -132,7 +129,7 @@ class Store extends Component {
         const user = await getUser(true)
         this.setState({user}, () => this.joinGame())
       } else {
-        this.setState({screen: 'retry'})
+        this.setState({screen: 'retry', joining: false})
       }
       return
     }
@@ -203,7 +200,7 @@ const Link = ({to, setState, children}) => (
     href={'/' + to}
     onClick={e => {
       e.preventDefault()
-      setState({screen: to, game: null})
+      setState({screen: to})
     }}
   >
     {children}
@@ -252,9 +249,10 @@ const Game = ({game, onType, onMessage, onPrediction, onNextStage}) => {
         }
         onFinish={() => game.stage !== 'end' && onNextStage()}
       />
-      <ul style={{width: '100%', overflowY: 'auto'}}>
+      <br />
+      <ul style={{width: '100%'}}>
         {game.messages.map(({from, text}, i) => (
-          <li key={i}>
+          <li key={i} style={{wordWrap: 'break-word'}}>
             <strong>{from === 'me' ? 'Me' : 'Stranger'}</strong>: {text}
           </li>
         ))}
@@ -341,11 +339,10 @@ const Lobby = () => (
 
 class Background extends React.Component {
   componentDidMount() {
-    this.particles = Particles.init({
-      selector: '#background',
-      connectParticles: true,
-      speed: 0.3
-    })
+    Trianglify({
+      width: window.innerWidth,
+      height: window.innerHeight
+    }).canvas(document.getElementById('background'))
   }
   componentWillUnmount() {
     this.particles.destroy()
@@ -357,50 +354,52 @@ class Background extends React.Component {
 
 const App = () => (
   <>
-    <div className="container">
-      <Store>
-        {({
-          state: {game, screen, score},
-          setState,
-          onType,
-          onMessage,
-          onPrediction,
-          onNextStage,
-          onReadIntro,
-          onAcceptLegal,
-          onRetryConnect
-        }) => {
-          if (screen === 'intro') return <Intro onNext={onReadIntro} />
-          if (screen === 'legal') return <Legal onNext={onAcceptLegal} />
-          if (screen === 'retry') return <Retry onNext={onRetryConnect} />
+    <div className="outer-container">
+      <div className="inner-container">
+        <Store>
+          {({
+            state: {game, screen, score},
+            setState,
+            onType,
+            onMessage,
+            onPrediction,
+            onNextStage,
+            onReadIntro,
+            onAcceptLegal,
+            onRetryConnect
+          }) => {
+            if (screen === 'intro') return <Intro onNext={onReadIntro} />
+            if (screen === 'legal') return <Legal onNext={onAcceptLegal} />
+            if (screen === 'retry') return <Retry onNext={onRetryConnect} />
 
-          return (
-            <>
-              <header>
-                <Link to="intro" setState={setState}>
-                  Intro / Rules
-                </Link>
-                <br />
-                <Link to="legal" setState={setState}>
-                  Legal
-                </Link>
-                <p>Score: {score}</p>
-              </header>
-              {game ? (
-                <Game
-                  game={game}
-                  onType={onType}
-                  onMessage={onMessage}
-                  onPrediction={onPrediction}
-                  onNextStage={onNextStage}
-                />
-              ) : (
-                <Lobby />
-              )}
-            </>
-          )
-        }}
-      </Store>
+            return (
+              <>
+                <header>
+                  <Link to="intro" setState={setState}>
+                    Intro / Rules
+                  </Link>
+                  <br />
+                  <Link to="legal" setState={setState}>
+                    Legal
+                  </Link>
+                  <p>Score: {score}</p>
+                </header>
+                {game ? (
+                  <Game
+                    game={game}
+                    onType={onType}
+                    onMessage={onMessage}
+                    onPrediction={onPrediction}
+                    onNextStage={onNextStage}
+                  />
+                ) : (
+                  <Lobby />
+                )}
+              </>
+            )
+          }}
+        </Store>
+      </div>
     </div>
     <Background />
   </>
