@@ -211,6 +211,14 @@ router.get('/*', serve(path.resolve(__dirname, '../../client/build')))
 
 app.use(logger())
 app.use(async (ctx, next) => {
+  ctx.set('Access-Control-Allow-Origin', '*')
+  ctx.set('Access-Control-Allow-Credentials', 'true')
+  ctx.set('Access-Control-Allow-Methods', 'POST, HEAD, GET')
+  ctx.set('Access-Control-Allow-Headers', 'content-type')
+
+  await next()
+})
+app.use(async (ctx, next) => {
   try {
     await next()
   } catch (err) {
@@ -220,5 +228,6 @@ app.use(async (ctx, next) => {
 })
 app.use(bodyParser())
 app.use(router.routes())
+app.use(router.allowedMethods())
 
 app.listen(3001)
