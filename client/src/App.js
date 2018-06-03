@@ -147,7 +147,13 @@ class Store extends Component {
     try {
       response = await axios.get('/api/poll', {params: {game, user}})
     } catch (err) {
-      if (!this.state.game || game !== this.state.game.id) return
+      if (
+        !this.state.game ||
+        game !== this.state.game.id ||
+        this.state.game.stage === 'end'
+      ) {
+        return
+      }
       setTimeout(
         () => this.poll(game),
         err.response && err.response.status === 408 ? 0 : 3000
