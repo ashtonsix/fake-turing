@@ -128,8 +128,10 @@ class Store extends Component {
       if (e.response.data === 'User not found') {
         const user = await getUser(true)
         this.setState({user}, () => this.joinGame())
-      } else {
+      } else if (this.state.screen === 'game') {
         this.setState({screen: 'retry', joining: false})
+      } else {
+        this.setState({joining: false})
       }
       return
     }
@@ -303,21 +305,22 @@ const Game = ({game, onType, onMessage, onPrediction, onNextStage}) => {
           <span>Press Enter to send</span>
         </>
       )}
-      {game.stage === 'predict' && (
-        <>
-          <strong>Make prediction:</strong>
-          <br />
-          <div>
-            <button
-              onClick={() => onPrediction('human')}
-              style={{marginRight: 10}}
-            >
-              Human
-            </button>
-            <button onClick={() => onPrediction('robot')}>Robot</button>
-          </div>
-        </>
-      )}
+      {game.stage === 'predict' &&
+        !game.myPrediction && (
+          <>
+            <strong>Make prediction:</strong>
+            <br />
+            <div>
+              <button
+                onClick={() => onPrediction('human')}
+                style={{marginRight: 10}}
+              >
+                Human
+              </button>
+              <button onClick={() => onPrediction('robot')}>Robot</button>
+            </div>
+          </>
+        )}
       {game.stage === 'end' && (
         <>
           <span>End of game</span>
