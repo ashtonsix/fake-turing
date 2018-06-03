@@ -125,6 +125,7 @@ class Store extends Component {
     try {
       response = await axios.post('/api/join-game', {user})
     } catch (e) {
+      console.error(e)
       if (e.response.data === 'User not found') {
         const user = await getUser(true)
         this.setState({user}, () => this.joinGame())
@@ -259,7 +260,7 @@ const Game = ({game, onType, onMessage, onPrediction, onNextStage}) => {
       <Timer
         key={game.stage}
         duration={
-          game.stage === 'chat' ? 30 : game.stage === 'predict' ? 10 : null
+          game.stage === 'chat' ? 60 : game.stage === 'predict' ? 15 : null
         }
         onFinish={() => game.stage !== 'end' && onNextStage()}
       />

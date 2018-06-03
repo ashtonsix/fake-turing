@@ -69,7 +69,7 @@ const dialog = (open, timeout = () => {}) => {
       done = true
       timeout()
       reject(Boom.clientTimeout())
-    }, 10000)
+    }, 15000)
   })
 }
 
