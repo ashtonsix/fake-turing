@@ -20,18 +20,41 @@ let lobby = null
 let games = {}
 let players = {}
 
-fs.readFileSync(__dirname + '/players.jsonl', 'utf8')
-  .split('\n')
-  .filter(l => l)
-  .forEach(player => {
-    player = JSON.parse(player)
-    players[player.id] = player
-  })
+try {
+  fs.readFileSync(__dirname + '../players.jsonl', 'utf8')
+    .split('\n')
+    .filter(l => l)
+    .forEach(player => {
+      player = JSON.parse(player)
+      players[player.id] = player
+    })
+} catch (e) {}
 
-var gamesFile = fs.createWriteStream(__dirname + '/games.jsonl', {flags: 'a'})
-var playersFile = fs.createWriteStream(__dirname + '/players.jsonl', {
-  flags: 'a'
-})
+var gamesFile = path.resolve(__dirname, '../games.jsonl')
+var playersFile = path.resolve(__dirname, '../players.jsonl')
+
+const streams = {}
+const appendToFile = (path, data) => {
+  if (!streams[path]) {
+    if (!fs.existsSync(path)) fs.closeSync(fs.openSync(path, 'w'))
+    streams[path] = {
+      size: fs.statSync(path).size,
+      stream: fs.createWriteStream(path, {flags: 'a'})
+    }
+  }
+  streams[path].stream.write(data, () => {
+    fs.stat(path, (e, stats) => {
+      if (stats.size <= streams[path].size) {
+        streams[path].stream.close()
+        streams[path] = {
+          size: stats.size,
+          stream: fs.createWriteStream(path, {flags: 'a'})
+        }
+        streams[path].stream.write(data)
+      }
+    })
+  })
+}
 
 const dialog = (open, timeout = () => {}) => {
   return new Promise((resolve, reject) => {
@@ -113,7 +136,7 @@ api.post('/predict', async (ctx, next) => {
   ctx.body = {data: viewer.correct}
 
   if (viewer.prediction && other.prediction) {
-    gamesFile.write(JSON.stringify(games[game]) + '\n')
+    appendToFile(gamesFile, JSON.stringify(games[game]) + '\n')
     delete games[game]
   }
 })
@@ -124,7 +147,7 @@ api.post('/create-player', async (ctx, next) => {
     robotChance: Math.random()
   }
   players[player.id] = player
-  playersFile.write(JSON.stringify(player) + '\n')
+  appendToFile(playersFile, JSON.stringify(player) + '\n')
   ctx.body = {data: player.id}
 })
 
@@ -170,7 +193,7 @@ api.post('/join-game', async (ctx, next) => {
   const tenMinutes = 10 * 60 * 1000
   setTimeout(() => {
     if (!games[game.id]) return
-    gamesFile.write(JSON.stringify(game) + '\n')
+    appendToFile(gamesFile, JSON.stringify(game) + '\n')
     delete games[game.id]
   }, tenMinutes)
 })

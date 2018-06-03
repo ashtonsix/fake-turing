@@ -16,7 +16,7 @@ const createGame = id => ({
 
 const getUser = async forceRefresh => {
   let user
-  if (!forceRefresh) window.localStorage.getItem('user')
+  if (!forceRefresh) user = window.localStorage.getItem('user')
   if (!user) {
     const response = await axios.post('/api/create-player')
     user = response.data.data
@@ -154,7 +154,13 @@ class Store extends Component {
       )
       return
     }
-    if (!this.state.game || game !== this.state.game.id) return
+    if (
+      !this.state.game ||
+      game !== this.state.game.id ||
+      this.state.game.stage === 'end'
+    ) {
+      return
+    }
     const {action, data} = response.data
     switch (action) {
       case 'typing':
@@ -292,7 +298,7 @@ const Game = ({game, onType, onMessage, onPrediction, onNextStage}) => {
           ) : null}
           <input
             style={{width: 300}}
-            onKeyPress={e => {
+            onKeyDown={e => {
               if (e.key === 'Enter') {
                 onMessage(e.target.value)
                 e.target.value = ''
